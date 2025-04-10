@@ -223,6 +223,114 @@
         // Auto check health on page load
         document.addEventListener('DOMContentLoaded', checkHealth);
 
+        // Get all despatch advices
+        async function getAllDespatchAdvices() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/despatch-advice-all`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    mode: 'cors',
+                    credentials: 'omit'
+                });
+                const data = await response.json();
+                document.getElementById('allDespatchAdvicesResponse').textContent = 
+                    `HTTP Status Code: ${response.status}\n\n` + 
+                    JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('allDespatchAdvicesResponse').textContent = 
+                    `Error: ${error.message}\n\n` +
+                    `HTTP Status Code: ${error.status || 'Unknown'}`;
+            }
+        }
+
+        // Get despatch advice IDs
+        async function getDespatchAdviceIds() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/despatch-advice-ids`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    mode: 'cors',
+                    credentials: 'omit'
+                });
+                const data = await response.json();
+                document.getElementById('despatchAdviceIdsResponse').textContent = 
+                    `HTTP Status Code: ${response.status}\n\n` + 
+                    JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('despatchAdviceIdsResponse').textContent = 
+                    `Error: ${error.message}\n\n` +
+                    `HTTP Status Code: ${error.status || 'Unknown'}`;
+            }
+        }
+
+        // Handle despatch info form submission
+        document.getElementById('despatchInfoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const despatchId = document.getElementById('despatchId').value;
+            
+            if (!despatchId) {
+                alert('Please enter a Despatch ID');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/despatch-advice-info/${despatchId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    mode: 'cors',
+                    credentials: 'omit'
+                });
+                const data = await response.json();
+                document.getElementById('despatchInfoResponse').textContent = 
+                    `HTTP Status Code: ${response.status}\n\n` + 
+                    JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('despatchInfoResponse').textContent = 
+                    `Error: ${error.message}\n\n` +
+                    `HTTP Status Code: ${error.status || 'Unknown'}`;
+            }
+        });
+
+        // Handle delete despatch form submission
+        document.getElementById('deleteDespatchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const despatchId = document.getElementById('deleteDespatchId').value;
+            
+            if (!despatchId) {
+                alert('Please enter a Despatch ID');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/despatch-advice-delete/${despatchId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    mode: 'cors',
+                    credentials: 'omit'
+                });
+                const data = await response.json();
+                document.getElementById('deleteDespatchResponse').textContent = 
+                    `HTTP Status Code: ${response.status}\n\n` + 
+                    JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('deleteDespatchResponse').textContent = 
+                    `Error: ${error.message}\n\n` +
+                    `HTTP Status Code: ${error.status || 'Unknown'}`;
+            }
+        });
+
         // Handle Order XML form submission
         document.getElementById('orderXmlForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -238,9 +346,14 @@
             formData.append('file', file);
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/v2/despatch-advice-generate`, {
+                const response = await fetch(`${API_BASE_URL}/v2/api/despatch-advice-generate`, {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    body: formData,
+                    mode: 'cors',
+                    credentials: 'omit'
                 });
                 
                 const responseData = await response.json();
@@ -275,9 +388,14 @@
             formData.append('file', file);
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/v2/despatch-advice/xml`, {
+                const response = await fetch(`${API_BASE_URL}/v2/api/despatch-advice/xml`, {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    body: formData,
+                    mode: 'cors',
+                    credentials: 'omit'
                 });
                 
                 const responseData = await response.json();
@@ -309,12 +427,15 @@
             }
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/v2/despatch-advice`, {
+                const response = await fetch(`${API_BASE_URL}/v2/api/despatch-advice`, {
                     method: 'POST',
                     headers: {
+                        'Accept': 'application/json',
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(JSON.parse(jsonData))
+                    body: JSON.stringify(JSON.parse(jsonData)),
+                    mode: 'cors',
+                    credentials: 'omit'
                 });
                 
                 const responseData = await response.json();
@@ -331,84 +452,6 @@
                     `Error: ${error.message}\n\n` +
                     `HTTP Status Code: ${error.status || 'Unknown'}\n\n` +
                     `API Endpoint: ${API_BASE_URL}/v2/api/despatch-advice`;
-            }
-        });
-
-        // Get all despatch advices
-        async function getAllDespatchAdvices() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/v1/despatch-advice-all`);
-                const data = await response.json();
-                document.getElementById('allDespatchAdvicesResponse').textContent = 
-                    `HTTP Status Code: ${response.status}\n\n` + 
-                    JSON.stringify(data, null, 2);
-            } catch (error) {
-                document.getElementById('allDespatchAdvicesResponse').textContent = 
-                    `Error: ${error.message}\n\n` +
-                    `HTTP Status Code: ${error.status || 'Unknown'}`;
-            }
-        }
-
-        // Get despatch advice IDs
-        async function getDespatchAdviceIds() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/v1/despatch-advice-ids`);
-                const data = await response.json();
-                document.getElementById('despatchAdviceIdsResponse').textContent = 
-                    `HTTP Status Code: ${response.status}\n\n` + 
-                    JSON.stringify(data, null, 2);
-            } catch (error) {
-                document.getElementById('despatchAdviceIdsResponse').textContent = 
-                    `Error: ${error.message}\n\n` +
-                    `HTTP Status Code: ${error.status || 'Unknown'}`;
-            }
-        }
-
-        // Handle despatch info form submission
-        document.getElementById('despatchInfoForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const despatchId = document.getElementById('despatchId').value;
-            
-            if (!despatchId) {
-                alert('Please enter a Despatch ID');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/v1/despatch-advice-info/${despatchId}`);
-                const data = await response.json();
-                document.getElementById('despatchInfoResponse').textContent = 
-                    `HTTP Status Code: ${response.status}\n\n` + 
-                    JSON.stringify(data, null, 2);
-            } catch (error) {
-                document.getElementById('despatchInfoResponse').textContent = 
-                    `Error: ${error.message}\n\n` +
-                    `HTTP Status Code: ${error.status || 'Unknown'}`;
-            }
-        });
-
-        // Handle delete despatch form submission
-        document.getElementById('deleteDespatchForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const despatchId = document.getElementById('deleteDespatchId').value;
-            
-            if (!despatchId) {
-                alert('Please enter a Despatch ID');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/v1/despatch-advice-delete/${despatchId}`, {
-                    method: 'DELETE'
-                });
-                const data = await response.json();
-                document.getElementById('deleteDespatchResponse').textContent = 
-                    `HTTP Status Code: ${response.status}\n\n` + 
-                    JSON.stringify(data, null, 2);
-            } catch (error) {
-                document.getElementById('deleteDespatchResponse').textContent = 
-                    `Error: ${error.message}\n\n` +
-                    `HTTP Status Code: ${error.status || 'Unknown'}`;
             }
         });
     </script>
