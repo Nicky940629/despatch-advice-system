@@ -193,8 +193,8 @@
             } catch (error) {
                 document.getElementById('despatchXmlResponse').textContent = 
                     `Error: ${error.message}\n\n` +
-                    `HTTP Status Code: ${error.status || 'Unknown'}\n\n` +
-                    `API Endpoint: ${API_BASE_URL}/v2/api/despatch-advice/xml`;
+                    `HTTP Status Code: ${error.status || response?.status || 'Unknown'}\n\n` +
+                    `API Endpoint: ${API_BASE_URL}/api/v2/despatch-advice/xml`;
             }
         });
     </script>

@@ -168,15 +168,10 @@
 
             try {
                 const response = await fetch(`${API_BASE_URL}/health`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
                 const data = await response.json();
                 healthResponse.textContent = JSON.stringify(data, null, 2);
                 
-                if (data.status === 'healthy') {
+                if (data.status === 'healthy aaaa') {
                     healthStatus.innerHTML = '<i class="fas fa-check-circle me-2"></i> System Status: Healthy';
                     healthStatus.className = 'health-status healthy';
                 } else {
@@ -186,7 +181,7 @@
             } catch (error) {
                 healthStatus.innerHTML = '<i class="fas fa-times-circle me-2"></i> System Status: Connection Failed';
                 healthStatus.className = 'health-status unhealthy';
-                healthResponse.textContent = `Error: ${error.message}\n\nPlease ensure:\n1. Using HTTPS protocol\n2. Network connection is stable\n3. Lambda service is running`;
+                healthResponse.textContent = `Error: ${error.message}\n\nHTTP Status Code: ${error.status || 'Unknown'}\n\nPlease ensure:\n1. Using HTTPS protocol\n2. Network connection is stable\n3. Lambda service is running`;
             }
         }
 
