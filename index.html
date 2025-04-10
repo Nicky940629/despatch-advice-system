@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Despatch Advice System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 60px;
+        }
+        .container {
+            max-width: 1200px;
+            margin-top: 30px;
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+        .card {
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-body {
+            text-align: center;
+        }
+        .card-title {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">Despatch Advice System</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="text-center mb-4">Despatch Advice System</h1>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">System Health</h5>
+                        <p class="card-text">Check system health status</p>
+                        <a href="/health" class="btn btn-primary">Go to Health Check</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Generate from Order XML</h5>
+                        <p class="card-text">Generate despatch advice from order XML</p>
+                        <a href="/generate" class="btn btn-primary">Go to Generator</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Create from XML</h5>
+                        <p class="card-text">Create despatch advice from XML</p>
+                        <a href="/create-xml" class="btn btn-primary">Go to XML Creator</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Create from JSON</h5>
+                        <p class="card-text">Create despatch advice from JSON</p>
+                        <a href="/create-json" class="btn btn-primary">Go to JSON Creator</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">All Despatch Advices</h5>
+                        <p class="card-text">View all despatch advices</p>
+                        <a href="/all" class="btn btn-primary">View All</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Despatch Advice IDs</h5>
+                        <p class="card-text">View all despatch advice IDs</p>
+                        <a href="/ids" class="btn btn-primary">View IDs</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Despatch Advice Info</h5>
+                        <p class="card-text">Get detailed information</p>
+                        <a href="/info" class="btn btn-primary">Get Info</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Delete Despatch Advice</h5>
+                        <p class="card-text">Delete a despatch advice</p>
+                        <a href="/delete" class="btn btn-danger">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
