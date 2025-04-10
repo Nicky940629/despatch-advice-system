@@ -68,11 +68,13 @@
         }
 
         .health-status {
-            padding: 1rem;
+            padding: 1.5rem;
             border-radius: 8px;
             margin-bottom: 1.5rem;
             font-weight: 500;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
         }
 
         .health-status.healthy {
@@ -83,6 +85,20 @@
         .health-status.unhealthy {
             background-color: #f8d7da;
             color: #721c24;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
         }
 
         .response-area {
@@ -100,20 +116,6 @@
             word-wrap: break-word;
             margin: 0;
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-        }
-
-        .btn-primary {
-            background-color: var(--secondary-color);
-            border: none;
-            padding: 0.5rem 1.5rem;
-            border-radius: 25px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background-color: #2980b9;
-            transform: scale(1.05);
         }
 
         @media (max-width: 768px) {
@@ -174,7 +176,7 @@
                 const data = await response.json();
                 healthResponse.textContent = JSON.stringify(data, null, 2);
                 
-                if (data.status === 'healthy aaaa') {
+                if (data.status === 'healthy') {
                     healthStatus.innerHTML = '<i class="fas fa-check-circle me-2"></i> System Status: Healthy';
                     healthStatus.className = 'health-status healthy';
                 } else {
