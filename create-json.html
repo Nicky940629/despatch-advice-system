@@ -197,13 +197,11 @@
                 }
                 
                 document.getElementById('jsonResponse').textContent = 
-                    `HTTP Status Code: ${response.status}\n\n` + 
                     JSON.stringify(responseData, null, 2);
             } catch (error) {
                 document.getElementById('jsonResponse').textContent = 
                     `Error: ${error.message}\n\n` +
-                    `HTTP Status Code: ${error.status || 'Unknown'}\n\n` +
-                    `API Endpoint: ${API_BASE_URL}/v2/api/despatch-advice`;
+                    `API Endpoint: ${API_BASE_URL}/api/v2/despatch-advice`;
             }
         });
     </script>

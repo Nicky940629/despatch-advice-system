@@ -188,12 +188,11 @@
                 }
                 
                 document.getElementById('orderXmlResponse').textContent = 
-                    `HTTP Status Code: ${response.status}\n\n` + 
                     JSON.stringify(responseData, null, 2);
             } catch (error) {
                 document.getElementById('orderXmlResponse').textContent = 
                     `Error: ${error.message}\n\n` +
-                    `API Endpoint: ${API_BASE_URL}/v2/api/despatch-advice-generate`;
+                    `API Endpoint: ${API_BASE_URL}/api/v2/despatch-advice-generate`;
             }
         });
     </script>
