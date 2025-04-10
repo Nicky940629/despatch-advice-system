@@ -346,7 +346,7 @@
             formData.append('file', file);
 
             try {
-                const response = await fetch(`${API_BASE_URL}/v2/api/despatch-advice-generate`, {
+                const response = await fetch(`${API_BASE_URL}/api/v2/despatch-advice-generate`, {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json'
@@ -369,7 +369,7 @@
                 document.getElementById('orderXmlResponse').textContent = 
                     `Error: ${error.message}\n\n` +
                     `HTTP Status Code: ${error.status || 'Unknown'}\n\n` +
-                    `API Endpoint: ${API_BASE_URL}/v2/api/despatch-advice-generate`;
+                    `API Endpoint: ${API_BASE_URL}/api/v2/despatch-advice-generate`;
             }
         });
 
@@ -388,7 +388,7 @@
             formData.append('file', file);
 
             try {
-                const response = await fetch(`${API_BASE_URL}/v2/api/despatch-advice/xml`, {
+                const response = await fetch(`${API_BASE_URL}/api/v2/despatch-advice/xml`, {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json'
@@ -411,7 +411,7 @@
                 document.getElementById('despatchXmlResponse').textContent = 
                     `Error: ${error.message}\n\n` +
                     `HTTP Status Code: ${error.status || 'Unknown'}\n\n` +
-                    `API Endpoint: ${API_BASE_URL}/v2/api/despatch-advice/xml`;
+                    `API Endpoint: ${API_BASE_URL}/api/v2/despatch-advice/xml`;
             }
         });
 
@@ -427,7 +427,7 @@
             }
 
             try {
-                const response = await fetch(`${API_BASE_URL}/v2/api/despatch-advice`, {
+                const response = await fetch(`${API_BASE_URL}/api/v2/despatch-advice`, {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json',
@@ -451,7 +451,7 @@
                 document.getElementById('jsonResponse').textContent = 
                     `Error: ${error.message}\n\n` +
                     `HTTP Status Code: ${error.status || 'Unknown'}\n\n` +
-                    `API Endpoint: ${API_BASE_URL}/v2/api/despatch-advice`;
+                    `API Endpoint: ${API_BASE_URL}/api/v2/despatch-advice`;
             }
         });
     </script>
