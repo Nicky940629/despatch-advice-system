@@ -5,46 +5,151 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Despatch Advice System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --background-color: #f8f9fa;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
         body {
             padding-top: 60px;
+            background-color: var(--background-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
+        .navbar {
+            background-color: var(--primary-color) !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+
         .container {
             max-width: 1200px;
             margin-top: 30px;
         }
-        .navbar {
-            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+
+        h1 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 1rem;
         }
+
+        h1:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--secondary-color);
+        }
+
         .card {
             margin-bottom: 20px;
-            transition: transform 0.2s;
+            border: none;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            background: white;
+            overflow: hidden;
         }
+
         .card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
+
         .card-body {
             text-align: center;
+            padding: 2rem;
         }
+
         .card-title {
-            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .card-text {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .btn-danger {
+            background-color: var(--accent-color);
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+            transform: scale(1.05);
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            .card {
+                margin-bottom: 15px;
+            }
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="index.html">Despatch Advice System</a>
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-truck me-2"></i>
+                Despatch Advice System
+            </a>
         </div>
     </nav>
 
     <div class="container">
-        <h1 class="text-center mb-4">Despatch Advice System</h1>
+        <h1 class="text-center">Despatch Advice System</h1>
         
         <div class="row">
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
+                        <i class="fas fa-heartbeat card-icon"></i>
                         <h5 class="card-title">System Health</h5>
                         <p class="card-text">Check system health status</p>
                         <a href="health.html" class="btn btn-primary">Go to Health Check</a>
@@ -55,6 +160,7 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
+                        <i class="fas fa-file-code card-icon"></i>
                         <h5 class="card-title">Generate from Order XML</h5>
                         <p class="card-text">Generate despatch advice from order XML</p>
                         <a href="generate.html" class="btn btn-primary">Go to Generator</a>
@@ -65,6 +171,7 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
+                        <i class="fas fa-file-export card-icon"></i>
                         <h5 class="card-title">Create from XML</h5>
                         <p class="card-text">Create despatch advice from XML</p>
                         <a href="create-xml.html" class="btn btn-primary">Go to XML Creator</a>
@@ -75,6 +182,7 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
+                        <i class="fas fa-file-alt card-icon"></i>
                         <h5 class="card-title">Create from JSON</h5>
                         <p class="card-text">Create despatch advice from JSON</p>
                         <a href="create-json.html" class="btn btn-primary">Go to JSON Creator</a>
@@ -85,6 +193,7 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
+                        <i class="fas fa-list card-icon"></i>
                         <h5 class="card-title">All Despatch Advices</h5>
                         <p class="card-text">View all despatch advices</p>
                         <a href="all.html" class="btn btn-primary">View All</a>
@@ -95,6 +204,7 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
+                        <i class="fas fa-id-card card-icon"></i>
                         <h5 class="card-title">Despatch Advice IDs</h5>
                         <p class="card-text">View all despatch advice IDs</p>
                         <a href="ids.html" class="btn btn-primary">View IDs</a>
@@ -105,6 +215,7 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
+                        <i class="fas fa-info-circle card-icon"></i>
                         <h5 class="card-title">Despatch Advice Info</h5>
                         <p class="card-text">Get detailed information</p>
                         <a href="info.html" class="btn btn-primary">Get Info</a>
@@ -115,6 +226,7 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
+                        <i class="fas fa-trash-alt card-icon"></i>
                         <h5 class="card-title">Delete Despatch Advice</h5>
                         <p class="card-text">Delete a despatch advice</p>
                         <a href="delete.html" class="btn btn-danger">Delete</a>
