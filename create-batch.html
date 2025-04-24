@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Batch - Despatch Advice System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --background-color: #f8f9fa;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            padding-top: 60px;
+            background-color: var(--background-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background-color: var(--primary-color) !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin-top: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        h1:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--secondary-color);
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            background: white;
+            margin-bottom: 20px;
+            padding: 2rem;
+        }
+
+        .form-control {
+            border-radius: 20px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+            transform: scale(1.05);
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section-title {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        #addIdBtn {
+            background-color: #2ecc71;
+            border-radius: 0 20px 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        #addIdBtn:hover {
+            background-color: #27ae60;
+            transform: scale(1.05);
+        }
+
+        #removeIdBtn {
+            background-color: var(--accent-color);
+            border-radius: 0 20px 20px 0;
+            transition: all 0.3s ease;
+            margin-left: 5px;
+        }
+
+        #removeIdBtn:hover {
+            background-color: #c0392b;
+            transform: scale(1.05);
+        }
+
+        .badge {
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 20px;
+            background-color: var(--secondary-color);
+            display: inline-block;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .badge:hover {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transform: translateY(-2px);
+        }
+        
+        .badge .fa-times {
+            margin-left: 5px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+        
+        .badge .fa-times:hover {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        #idList {
+            margin-top: 10px;
+            min-height: 45px;
+            border-radius: 10px;
+            padding: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .id-input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .id-input-actions {
+            display: flex;
+        }
+        
+        .id-count-badge {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+        
+        .empty-id-list {
+            text-align: center;
+            color: #95a5a6;
+            font-style: italic;
+            padding: 10px;
+            display: none;
+        }
+        
+        .id-badge-container {
+            padding: 5px;
+            border-radius: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+
+        .response-area {
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            min-height: 100px;
+        }
+
+        .success-response {
+            color: #28a745;
+        }
+
+        .error-response {
+            color: #dc3545;
+        }
+
+        .request-data {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #e9ecef;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-truck me-2"></i>
+                Despatch Advice System
+            </a>
+            <div class="ms-auto" id="authButtons">
+                <button class="btn btn-outline-light me-2" id="loginBtn">
+                    <i class="fas fa-sign-in-alt me-2"></i>
+                    Login
+                </button>
+                <button class="btn btn-outline-light" id="signupBtn">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Sign Up
+                </button>
+            </div>
+            <div class="ms-auto d-none" id="logoutButton">
+                <span class="text-light me-3" id="userEmail"></span>
+                <button class="btn btn-outline-light" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt me-2"></i>
+                    Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="text-center">Create Batch</h1>
+        
+        <div class="card">
+            <div class="form-section">
+                <h3 class="form-section-title">Batch Information</h3>
+                <form id="createBatchForm">
+                    <div class="mb-3">
+                        <label for="batchId" class="form-label">Batch ID</label>
+                        <input type="text" class="form-control" id="batchId" placeholder="Enter batch ID (e.g., BATCH-001)" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description (Optional)</label>
+                        <textarea class="form-control" id="description" rows="3" placeholder="Enter batch description"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status (Optional)</label>
+                        <select class="form-control" id="status">
+                            <option value="">Select status</option>
+                            <option value="start">Start</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="end">End</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Despatch Advice IDs</label>
+                        <div class="id-input-group">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="despatchId" placeholder="Enter despatch advice ID">
+                                <button class="btn" type="button" id="addIdBtn">
+                                    <i class="fas fa-plus me-1"></i> Add
+                                </button>
+                            </div>
+                            <button class="btn btn-danger" type="button" id="removeIdBtn" title="Remove all IDs">
+                                <i class="fas fa-trash me-1"></i>
+                            </button>
+                            <span class="id-count-badge" id="idCountBadge">0</span>
+                        </div>
+                        <div class="id-badge-container">
+                            <div id="idList"></div>
+                            <div class="empty-id-list" id="emptyIdList">No despatch advice IDs added yet</div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="button" class="btn btn-secondary me-md-2" id="cancelBtn">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Batch</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="response-area d-none" id="responseArea">
+                <h5>Response:</h5>
+                <pre id="responseContent"></pre>
+                <div id="requestData" class="request-data mt-3 d-none">
+                    <h6>Request Data:</h6>
+                    <pre id="requestDataContent"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE_URL = 'https://7z56uquwqumjtnnfjy2k7bv4jq0yizdl.lambda-url.us-east-1.on.aws';
+        let despatchIds = [];
+        
+        // Check if user is logged in
+        function checkAuthStatus() {
+            const token = localStorage.getItem('token');
+            const email = localStorage.getItem('email');
+            
+            if (token && email) {
+                // Logged in
+                document.getElementById('authButtons').classList.add('d-none');
+                document.getElementById('logoutButton').classList.remove('d-none');
+                document.getElementById('userEmail').textContent = email;
+            } else {
+                // Not logged in, redirect to login page
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            
+            // Add Despatch ID to the list
+            document.getElementById('addIdBtn').addEventListener('click', function() {
+                const idInput = document.getElementById('despatchId');
+                const id = idInput.value.trim();
+                
+                if (id && !despatchIds.includes(id)) {
+                    despatchIds.push(id);
+                    updateIdList();
+                    idInput.value = '';
+                    
+                    // Add a subtle animation effect
+                    idInput.classList.add('is-valid');
+                    setTimeout(() => {
+                        idInput.classList.remove('is-valid');
+                    }, 1000);
+                    
+                    // Focus back on input for continuous adding
+                    idInput.focus();
+                } else if (despatchIds.includes(id)) {
+                    // Show error if ID already exists
+                    idInput.classList.add('is-invalid');
+                    setTimeout(() => {
+                        idInput.classList.remove('is-invalid');
+                    }, 1000);
+                }
+            });
+            
+            // Add on Enter key press
+            document.getElementById('despatchId').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.getElementById('addIdBtn').click();
+                }
+            });
+            
+            // Remove all Despatch IDs with confirmation
+            document.getElementById('removeIdBtn').addEventListener('click', function() {
+                if (despatchIds.length === 0) return;
+                
+                if (despatchIds.length > 5) {
+                    if (confirm(`Are you sure you want to remove all ${despatchIds.length} IDs?`)) {
+                        despatchIds = [];
+                        updateIdList();
+                    }
+                } else {
+                    despatchIds = [];
+                    updateIdList();
+                }
+            });
+            
+            // Update the visible list of IDs
+            function updateIdList() {
+                const idList = document.getElementById('idList');
+                const emptyIdList = document.getElementById('emptyIdList');
+                const idCountBadge = document.getElementById('idCountBadge');
+                
+                idList.innerHTML = '';
+                idCountBadge.textContent = despatchIds.length;
+                
+                if (despatchIds.length === 0) {
+                    emptyIdList.style.display = 'block';
+                } else {
+                    emptyIdList.style.display = 'none';
+                    
+                    despatchIds.forEach(id => {
+                        const badge = document.createElement('span');
+                        badge.className = 'badge';
+                        badge.innerHTML = `${id} <i class="fas fa-times" data-id="${id}"></i>`;
+                        badge.setAttribute('title', `Click × to remove ${id}`);
+                        
+                        // Add a subtle entrance animation
+                        badge.style.opacity = '0';
+                        badge.style.transform = 'translateY(10px)';
+                        
+                        idList.appendChild(badge);
+                        
+                        setTimeout(() => {
+                            badge.style.opacity = '1';
+                            badge.style.transform = 'translateY(0)';
+                        }, 10);
+                    });
+                    
+                    // Add click event for removing individual IDs
+                    document.querySelectorAll('#idList .fa-times').forEach(icon => {
+                        icon.addEventListener('click', function() {
+                            const idToRemove = this.getAttribute('data-id');
+                            const badge = this.parentElement;
+                            
+                            // Add removal animation
+                            badge.style.opacity = '0';
+                            badge.style.transform = 'scale(0.8)';
+                            
+                            setTimeout(() => {
+                                despatchIds = despatchIds.filter(id => id !== idToRemove);
+                                updateIdList();
+                            }, 300);
+                        });
+                    });
+                }
+            }
+            
+            // Form submission
+            document.getElementById('createBatchForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const batchId = document.getElementById('batchId').value.trim();
+                const description = document.getElementById('description').value.trim();
+                const status = document.getElementById('status').value;
+                
+                if (despatchIds.length === 0) {
+                    alert('Please add at least one Despatch Advice ID.');
+                    return;
+                }
+                
+                // Prepare request body
+                const requestBody = {
+                    batch_id: batchId,
+                    despatch_advice_ids: despatchIds
+                };
+                
+                // Add optional fields if provided
+                if (description) {
+                    requestBody.description = description;
+                }
+                
+                if (status) {
+                    requestBody.status = status;
+                }
+                
+                // Display request data
+                const requestDataSection = document.getElementById('requestData');
+                const requestDataContent = document.getElementById('requestDataContent');
+                requestDataSection.classList.remove('d-none');
+                requestDataContent.textContent = JSON.stringify(requestBody, null, 2);
+                
+                // Send API request
+                fetch(`${API_BASE_URL}/api/v2/batches`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(requestBody)
+                })
+                .then(response => {
+                    // Show response area
+                    const responseArea = document.getElementById('responseArea');
+                    responseArea.classList.remove('d-none');
+                    
+                    // Display full response for debugging
+                    return response.text().then(text => {
+                        let responseData = text;
+                        try {
+                            // Try to parse as JSON for prettier display
+                            const jsonData = JSON.parse(text);
+                            responseData = JSON.stringify(jsonData, null, 2);
+                        } catch (e) {
+                            // If not JSON, just show the raw text
+                        }
+                        
+                        // Handle response based on status code
+                        if (response.status === 201) {
+                            responseArea.classList.add('success-response');
+                            responseArea.classList.remove('error-response');
+                            document.getElementById('responseContent').textContent = 
+                                `Success: All despatch advice IDs exist. Batch created successfully.\n\nResponse:\n${responseData}`;
+                        } else if (response.status === 207) {
+                            responseArea.classList.add('success-response');
+                            responseArea.classList.remove('error-response');
+                            document.getElementById('responseContent').textContent = 
+                                `Partial Success: Some despatch advice IDs exist. Batch created with existing IDs only.\n\nResponse:\n${responseData}`;
+                        } else if (response.status === 404) {
+                            responseArea.classList.remove('success-response');
+                            responseArea.classList.add('error-response');
+                            document.getElementById('responseContent').textContent = 
+                                `Error: None of the despatch advice IDs exist.\n\nResponse:\n${responseData}`;
+                        } else {
+                            responseArea.classList.remove('success-response');
+                            responseArea.classList.add('error-response');
+                            document.getElementById('responseContent').textContent = 
+                                `Error: ${response.status} - ${response.statusText}\n\nResponse:\n${responseData}`;
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('responseArea').classList.remove('d-none');
+                    document.getElementById('responseArea').classList.add('error-response');
+                    document.getElementById('responseArea').classList.remove('success-response');
+                    document.getElementById('responseContent').textContent = `Error: ${error.message}`;
+                });
+            });
+            
+            // Cancel button returns to home page
+            document.getElementById('cancelBtn').addEventListener('click', function() {
+                window.location.href = 'index.html';
+            });
+            
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                const email = localStorage.getItem('email');
+                
+                fetch(`${API_BASE_URL}/api/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                })
+                .then(response => {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('email');
+                    window.location.href = 'index.html';
+                })
+                .catch(error => {
+                    alert('Logout failed: ' + error.message);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

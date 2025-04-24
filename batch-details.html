@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch Details - Despatch Advice System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --background-color: #f8f9fa;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            padding-top: 60px;
+            background-color: var(--background-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background-color: var(--primary-color) !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin-top: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        h1:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--secondary-color);
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            background: white;
+            margin-bottom: 20px;
+            padding: 1.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+            transform: scale(1.05);
+        }
+
+        .btn-danger {
+            background-color: var(--accent-color);
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+            transform: scale(1.05);
+        }
+
+        .badge-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        .badge-start {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .badge-in-progress {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .badge-end {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 600;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .batch-meta {
+            background-color: rgba(52, 152, 219, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .meta-item {
+            margin-bottom: 10px;
+        }
+
+        .meta-label {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .id-list {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .batch-id {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .actions-container {
+            margin-top: 30px;
+            text-align: right;
+        }
+
+        .loader-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 300px;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid var(--secondary-color);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-container {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--accent-color);
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-truck me-2"></i>
+                Despatch Advice System
+            </a>
+            <div class="ms-auto" id="authButtons">
+                <button class="btn btn-outline-light me-2" id="loginBtn">
+                    <i class="fas fa-sign-in-alt me-2"></i>
+                    Login
+                </button>
+                <button class="btn btn-outline-light" id="signupBtn">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Sign Up
+                </button>
+            </div>
+            <div class="ms-auto d-none" id="logoutButton">
+                <span class="text-light me-3" id="userEmail"></span>
+                <button class="btn btn-outline-light" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt me-2"></i>
+                    Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="text-center">Batch Details</h1>
+        
+        <!-- Loading spinner -->
+        <div id="loadingSpinner" class="loader-container">
+            <div class="loader"></div>
+        </div>
+        
+        <!-- Error message (initially hidden) -->
+        <div id="errorContainer" class="error-container d-none">
+            <div class="card">
+                <i class="fas fa-exclamation-triangle error-icon"></i>
+                <p class="error-message" id="errorMessage">An error occurred while loading batch details.</p>
+                <a href="all-batches.html" class="btn btn-primary mt-4">
+                    <i class="fas fa-arrow-left me-2"></i>Back to All Batches
+                </a>
+            </div>
+        </div>
+        
+        <!-- Batch details (initially hidden) -->
+        <div id="batchDetailsContainer" class="d-none">
+            <div class="card">
+                <div class="batch-meta">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="batch-id" id="batchId"></div>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <span id="batchStatus"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <h3 class="section-title">Batch Information</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="meta-item">
+                                    <div class="meta-label">Description</div>
+                                    <div id="batchDescription">-</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="meta-item">
+                                    <div class="meta-label">Despatch Advice Count</div>
+                                    <div id="despatchCount">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="section-title mt-4">Despatch Advice IDs</h3>
+                <div class="id-list" id="despatchIdList">
+                    <p class="text-center text-muted">No despatch advice IDs found.</p>
+                </div>
+                
+                <div class="actions-container">
+                    <a href="all-batches.html" class="btn btn-secondary me-2">
+                        <i class="fas fa-arrow-left me-2"></i>Back
+                    </a>
+                    <a id="editBatchLink" href="#" class="btn btn-primary me-2">
+                        <i class="fas fa-edit me-2"></i>Edit Batch
+                    </a>
+                    <a id="deleteBatchLink" href="#" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Delete Batch
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE_URL = 'https://7z56uquwqumjtnnfjy2k7bv4jq0yizdl.lambda-url.us-east-1.on.aws';
+        
+        // Format status badge
+        function formatStatus(status) {
+            if (!status) return '<span class="badge bg-secondary badge-status">None</span>';
+            
+            switch (status.toLowerCase()) {
+                case 'start':
+                    return '<span class="badge badge-status badge-start">Start</span>';
+                case 'in-progress':
+                    return '<span class="badge badge-status badge-in-progress">In Progress</span>';
+                case 'end':
+                    return '<span class="badge badge-status badge-end">End</span>';
+                default:
+                    return `<span class="badge bg-secondary badge-status">${status}</span>`;
+            }
+        }
+        
+        // Get batch ID from URL
+        function getBatchIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+        
+        // Check if user is logged in
+        function checkAuthStatus() {
+            const token = localStorage.getItem('token');
+            const email = localStorage.getItem('email');
+            
+            if (token && email) {
+                // Logged in
+                document.getElementById('authButtons').classList.add('d-none');
+                document.getElementById('logoutButton').classList.remove('d-none');
+                document.getElementById('userEmail').textContent = email;
+            } else {
+                // Not logged in, redirect to login page
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            
+            const batchId = getBatchIdFromUrl();
+            if (!batchId) {
+                // No batch ID provided, show error
+                document.getElementById('loadingSpinner').classList.add('d-none');
+                document.getElementById('errorContainer').classList.remove('d-none');
+                document.getElementById('errorMessage').textContent = 'No batch ID provided.';
+                return;
+            }
+            
+            // Update links with batch ID
+            document.getElementById('editBatchLink').href = `update-batch.html?id=${batchId}`;
+            document.getElementById('deleteBatchLink').href = `delete-batch.html?id=${batchId}`;
+            
+            // Fetch batch details
+            fetch(`${API_BASE_URL}/api/v2/batches/${batchId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('Batch not found');
+                    }
+                    throw new Error('Failed to fetch batch details');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Hide loading spinner
+                document.getElementById('loadingSpinner').classList.add('d-none');
+                
+                // Populate batch details
+                document.getElementById('batchId').textContent = data.batch_id || batchId;
+                document.getElementById('batchStatus').innerHTML = formatStatus(data.status);
+                document.getElementById('batchDescription').textContent = data.description || 'No description';
+                
+                // Set despatch advice count and populate list
+                const despatchIds = data.despatch_advice_ids || [];
+                document.getElementById('despatchCount').textContent = despatchIds.length;
+                
+                const idListContainer = document.getElementById('despatchIdList');
+                if (despatchIds.length > 0) {
+                    idListContainer.innerHTML = '';
+                    
+                    // Create list of IDs
+                    const list = document.createElement('ul');
+                    list.className = 'list-group';
+                    
+                    despatchIds.forEach(id => {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                        
+                        const idSpan = document.createElement('span');
+                        idSpan.textContent = id;
+                        
+                        const detailsLink = document.createElement('a');
+                        detailsLink.href = `info.html?id=${id}`;
+                        detailsLink.className = 'btn btn-sm btn-outline-primary';
+                        detailsLink.innerHTML = '<i class="fas fa-info-circle me-1"></i> View Details';
+                        
+                        listItem.appendChild(idSpan);
+                        listItem.appendChild(detailsLink);
+                        list.appendChild(listItem);
+                    });
+                    
+                    idListContainer.appendChild(list);
+                }
+                
+                // Show batch details container
+                document.getElementById('batchDetailsContainer').classList.remove('d-none');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Show error message
+                document.getElementById('loadingSpinner').classList.add('d-none');
+                document.getElementById('errorContainer').classList.remove('d-none');
+                document.getElementById('errorMessage').textContent = error.message;
+            });
+            
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                const email = localStorage.getItem('email');
+                
+                fetch(`${API_BASE_URL}/api/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                })
+                .then(response => {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('email');
+                    window.location.href = 'index.html';
+                })
+                .catch(error => {
+                    alert('Logout failed: ' + error.message);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

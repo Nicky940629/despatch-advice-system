@@ -107,13 +107,60 @@
             max-height: 300px;
             overflow-y: auto;
             border: 1px solid #e9ecef;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
         }
 
         pre {
             white-space: pre-wrap;
             word-wrap: break-word;
             margin: 0;
-            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+
+        .xml-content {
+            color: #333;
+        }
+        
+        .xml-tag {
+            color: #0275d8;
+        }
+        
+        .xml-attr {
+            color: #8a6d3b;
+        }
+        
+        .xml-val {
+            color: #d32f2f;
+        }
+        
+        .xml-comment {
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .status-bar {
+            background-color: #f1f8ff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .status-success {
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+        }
+        
+        .status-error {
+            background-color: #f2dede;
+            border-color: #ebccd1;
+        }
+        
+        .download-btn {
+            margin-top: 10px;
+            display: none;
         }
 
         @media (max-width: 768px) {
@@ -158,15 +205,67 @@
                     </button>
                 </form>
                 <div class="response-area mt-3">
+                    <div id="responseStatus" class="status-bar d-none">
+                        <span id="statusCode"></span>
+                        <span id="responseTime"></span>
+                    </div>
                     <pre id="orderXmlResponse">Response will appear here...</pre>
+                    <button id="downloadXml" class="btn btn-sm btn-outline-secondary download-btn mt-2">
+                        <i class="fas fa-download me-1"></i> Download XML
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
     <script>
         const API_BASE_URL = 'https://7z56uquwqumjtnnfjy2k7bv4jq0yizdl.lambda-url.us-east-1.on.aws';
+
+        // 格式化 XML 字符串
+        function formatXML(xml) {
+            let formatted = '';
+            let indent = '';
+            const tab = '    ';
+            xml.split(/>\s*</).forEach(function(node) {
+                if (node.match(/^\/\w/)) {
+                    // 如果是結束標籤，減少縮進
+                    indent = indent.substring(tab.length);
+                }
+                formatted += indent + '<' + node + '>\r\n';
+                if (node.match(/^<?\w[^>]*[^\/]$/) && !node.startsWith("?")) {
+                    // 如果不是自閉合標籤，增加縮進
+                    indent += tab;
+                }
+            });
+            return formatted.substring(1, formatted.length - 3);
+        }
+
+        // 簡單的 XML 語法高亮
+        function highlightXML(xml) {
+            return xml
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/("[^"]*")/g, '<span class="xml-val">$1</span>')
+                .replace(/&lt;(\/?[a-zA-Z0-9_:-]+)(\s|&gt;)/g, '&lt;<span class="xml-tag">$1</span>$2')
+                .replace(/([a-zA-Z0-9_:-]+)="([^"]*)"/g, '<span class="xml-attr">$1</span>="<span class="xml-val">$2</span>"')
+                .replace(/&lt;!--(.+?)--&gt;/g, '&lt;!--<span class="xml-comment">$1</span>--&gt;');
+        }
+
+        // 下載 XML 文件
+        function downloadXML(xml, filename) {
+            const blob = new Blob([xml], { type: 'application/xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename || 'despatch-advice.xml';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
 
         document.getElementById('orderXmlForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -174,12 +273,22 @@
             const file = fileInput.files[0];
             
             if (!file) {
-                alert('Please select an XML file');
+                alert('Select XML file');
                 return;
             }
 
             const formData = new FormData();
             formData.append('file', file);
+            
+            const startTime = Date.now();
+            const responseStatus = document.getElementById('responseStatus');
+            const statusCode = document.getElementById('statusCode');
+            const responseTime = document.getElementById('responseTime');
+            const downloadBtn = document.getElementById('downloadXml');
+            
+            responseStatus.classList.add('d-none');
+            document.getElementById('orderXmlResponse').textContent = 'Loading...';
+            downloadBtn.style.display = 'none';
 
             try {
                 const response = await fetch(`${API_BASE_URL}/api/v2/despatch-advice-generate`, {
@@ -187,15 +296,49 @@
                     body: formData
                 });
                 
-                const responseData = await response.json();
+                const responseText = await response.text();
+                const elapsedTime = Date.now() - startTime;
                 
-                if (!response.ok) {
-                    throw new Error(responseData.detail || `HTTP error! status: ${response.status}`);
+                // Display status code and response time
+                responseStatus.classList.remove('d-none');
+                statusCode.textContent = `Status: ${response.status} ${response.statusText}`;
+                responseTime.textContent = `Response time: ${elapsedTime}ms`;
+                
+                // Set appropriate status style
+                responseStatus.classList.remove('status-success', 'status-error');
+                if (response.ok) {
+                    responseStatus.classList.add('status-success');
+                } else {
+                    responseStatus.classList.add('status-error');
                 }
                 
-                document.getElementById('orderXmlResponse').textContent = 
-                    JSON.stringify(responseData, null, 2);
+                if (!response.ok) {
+                    document.getElementById('orderXmlResponse').textContent = `Error: ${responseText}`;
+                    return;
+                }
+                
+                try {
+                    // 嘗試格式化 XML
+                    const formattedXML = formatXML(responseText);
+                    const highlightedXML = highlightXML(formattedXML);
+                    document.getElementById('orderXmlResponse').innerHTML = highlightedXML;
+                    
+                    // 顯示下載按鈕
+                    downloadBtn.style.display = 'block';
+                    downloadBtn.addEventListener('click', () => {
+                        downloadXML(responseText, 'despatch-advice.xml');
+                    });
+                } catch (formatError) {
+                    // If formatting fails, display original response
+                    document.getElementById('orderXmlResponse').textContent = responseText;
+                    console.error('XML formatting failed', formatError);
+                }
             } catch (error) {
+                responseStatus.classList.remove('d-none');
+                responseStatus.classList.add('status-error');
+                statusCode.textContent = `Error: ${error.message}`;
+                responseTime.textContent = `Response time: ${Date.now() - startTime}ms`;
+                
                 document.getElementById('orderXmlResponse').textContent = 
                     `Error: ${error.message}\n\n` +
                     `API Endpoint: ${API_BASE_URL}/api/v2/despatch-advice-generate`;
