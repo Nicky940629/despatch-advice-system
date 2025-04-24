@@ -12,6 +12,7 @@
             --secondary-color: #3498db;
             --accent-color: #e74c3c;
             --background-color: #f8f9fa;
+            --success-color: #2ecc71;
             --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
@@ -67,16 +68,11 @@
             padding: 2rem;
         }
 
-        .form-label {
-            color: var(--primary-color);
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-
         .form-control {
-            border-radius: 8px;
-            padding: 0.75rem;
-            border: 1px solid #ced4da;
+            border-radius: 25px;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #e1e5eb;
+            background-color: #f9fafc;
             transition: all 0.3s ease;
         }
 
@@ -116,6 +112,26 @@
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
         }
 
+        .spinner-border {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.5rem;
+            display: none;
+        }
+
+        .info-box {
+            background-color: #e9f7fe;
+            border-left: 4px solid var(--secondary-color);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 5px;
+        }
+
+        .info-box p {
+            margin-bottom: 0;
+            color: #2c3e50;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 0 15px;
@@ -130,6 +146,13 @@
                 <i class="fas fa-truck me-2"></i>
                 Despatch Advice System
             </a>
+            <div class="ms-auto d-none" id="logoutButton">
+                <span class="text-light me-3" id="userEmail"></span>
+                <button class="btn btn-outline-light" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt me-2"></i>
+                    Logout
+                </button>
+            </div>
         </div>
     </nav>
 
@@ -138,21 +161,24 @@
         
         <div class="card">
             <div class="card-body">
-                <form id="despatchInfoForm">
-                    <div class="mb-4">
-                        <label for="despatchId" class="form-label">
-                            <i class="fas fa-id-card me-2"></i>
-                            Enter Despatch ID
-                        </label>
-                        <input type="text" class="form-control" id="despatchId" placeholder="e.g., DA-2024-3">
+                <div class="info-box">
+                    <p>Enter a despatch advice ID to view its details. Information about the despatch advice will be displayed below.</p>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="despatchAdviceId" class="form-label">Despatch Advice ID</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="despatchAdviceId" 
+                               placeholder="Enter the despatch advice ID">
+                        <button class="btn btn-primary" id="fetchInfoBtn">
+                            <span class="spinner-border" id="loadingSpinner" role="status" aria-hidden="true"></span>
+                            <i class="fas fa-search"></i> Get Info
+                        </button>
                     </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Get Despatch Advice Info
-                    </button>
-                </form>
-                <div class="response-area mt-3">
-                    <pre id="despatchInfoResponse">Response will appear here...</pre>
+                </div>
+                
+                <div class="response-area">
+                    <pre id="despatchAdviceResponse">Response will appear here...</pre>
                 </div>
             </div>
         </div>
@@ -162,26 +188,119 @@
     <script>
         const API_BASE_URL = 'https://7z56uquwqumjtnnfjy2k7bv4jq0yizdl.lambda-url.us-east-1.on.aws';
 
-        document.getElementById('despatchInfoForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const despatchId = document.getElementById('despatchId').value;
+        // 檢查用戶是否已登入
+        function checkAuthStatus() {
+            const token = localStorage.getItem('token');
+            const email = localStorage.getItem('email');
             
-            if (!despatchId) {
-                alert('Please enter a Despatch ID');
+            if (token && email) {
+                // 驗證 token 格式
+                if (token.length < 10 || !token.includes('.')) {
+                    // 無效的 token 格式，清除並重定向
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('email');
+                    window.location.replace('index.html?auth=invalid');
+                    return false;
+                }
+                
+                // 更新已登入狀態的 UI
+                document.getElementById('logoutButton').classList.remove('d-none');
+                document.getElementById('userEmail').textContent = email;
+                return true;
+            } else {
+                // 未登入，重定向到登入頁面
+                window.location.replace('index.html?auth=required');
+                return false;
+            }
+        }
+
+        // 安全檢查 - 防止直接 URL 訪問
+        if (document.referrer === '' || 
+            (!document.referrer.includes('index.html') && 
+             !document.referrer.includes('create-batch.html') && 
+             !document.referrer.includes('all-batches.html') && 
+             !document.referrer.includes('update-batch.html') && 
+             !document.referrer.includes('delete-batch.html') && 
+             !document.referrer.includes('batch-details.html') &&
+             !document.referrer.includes('create-xml.html') &&
+             !document.referrer.includes('generate.html') &&
+             !document.referrer.includes('all.html') &&
+             !document.referrer.includes('delete.html') &&
+             !document.referrer.includes('info.html') &&
+             !document.referrer.includes('ids.html'))) {
+            // 如果是直接訪問而不是通過適當的導航
+            if (!localStorage.getItem('token') || !localStorage.getItem('email')) {
+                window.location.replace('index.html?auth=direct');
+            }
+        }
+
+        async function fetchDespatchAdviceInfo() {
+            const id = document.getElementById('despatchAdviceId').value.trim();
+            const responseArea = document.getElementById('despatchAdviceResponse');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            if (!id) {
+                responseArea.textContent = 'Please enter a despatch advice ID.';
                 return;
             }
-
+            
+            loadingSpinner.style.display = 'inline-block';
+            
             try {
-                const response = await fetch(`${API_BASE_URL}/api/v1/despatch-advice-info/${despatchId}`);
-                const data = await response.json();
-                document.getElementById('despatchInfoResponse').textContent = 
-                    `HTTP Status Code: ${response.status}\n\n` + 
-                    JSON.stringify(data, null, 2);
+                const response = await fetch(`${API_BASE_URL}/api/v2/despatch-advice/${id}`);
+                
+                let responseText;
+                try {
+                    const data = await response.json();
+                    responseText = JSON.stringify(data, null, 2);
+                } catch (e) {
+                    responseText = await response.text() || 'No response body';
+                }
+                
+                responseArea.textContent = `HTTP Status Code: ${response.status}\n\n` + responseText;
+                
+                if (!response.ok && response.status === 404) {
+                    responseArea.textContent = `Despatch advice with ID "${id}" not found.`;
+                }
             } catch (error) {
-                document.getElementById('despatchInfoResponse').textContent = 
-                    `Error: ${error.message}\n\n` +
-                    `HTTP Status Code: ${error.status || 'Unknown'}`;
+                responseArea.textContent = `Error: ${error.message}`;
+            } finally {
+                loadingSpinner.style.display = 'none';
             }
+        }
+
+        // 登出功能
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            const email = localStorage.getItem('email');
+            
+            fetch(`${API_BASE_URL}/api/logout`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email })
+            })
+            .then(response => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('email');
+                window.location.href = 'index.html';
+            })
+            .catch(error => {
+                alert('Logout failed: ' + error.message);
+            });
+        });
+
+        // 初始化頁面和事件監聽器
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus(); // 檢查用戶是否已登入
+            
+            document.getElementById('fetchInfoBtn').addEventListener('click', fetchDespatchAdviceInfo);
+            
+            document.getElementById('despatchAdviceId').addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    fetchDespatchAdviceInfo();
+                }
+            });
         });
     </script>
 </body>

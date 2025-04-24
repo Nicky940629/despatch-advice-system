@@ -401,6 +401,95 @@
         document.addEventListener('DOMContentLoaded', function() {
             checkAuthStatus();
             
+            // Check for auth error parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const authError = urlParams.get('auth');
+            
+            if (authError) {
+                // Display appropriate error message based on parameter
+                let errorMessage = "";
+                
+                switch(authError) {
+                    case 'required':
+                        errorMessage = "You must be logged in to access that page.";
+                        break;
+                    case 'invalid':
+                        errorMessage = "Your login session is invalid or expired. Please log in again.";
+                        break;
+                    case 'direct':
+                        errorMessage = "Direct access to internal pages is not allowed. Please log in first.";
+                        break;
+                    case 'expired':
+                        errorMessage = "Your session has expired. Please log in again.";
+                        break;
+                    default:
+                        errorMessage = "Authentication error. Please log in.";
+                }
+                
+                // Show error message
+                // If login form is visible, show error there
+                if (!document.getElementById('registrationForm').classList.contains('d-none')) {
+                    // Show on login form
+                    const loginErrorAlert = document.createElement('div');
+                    loginErrorAlert.className = 'alert alert-danger';
+                    loginErrorAlert.textContent = errorMessage;
+                    
+                    const loginForm = document.getElementById('loginForm');
+                    loginForm.insertBefore(loginErrorAlert, loginForm.firstChild);
+                } else {
+                    // Show as a toast notification
+                    const toastContainer = document.createElement('div');
+                    toastContainer.className = 'position-fixed bottom-0 end-0 p-3';
+                    toastContainer.style.zIndex = '11';
+                    
+                    toastContainer.innerHTML = `
+                    <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="toast-header bg-danger text-white">
+                            <strong class="me-auto">Authentication Error</strong>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">
+                            ${errorMessage}
+                        </div>
+                    </div>
+                    `;
+                    
+                    document.body.appendChild(toastContainer);
+                    
+                    // Auto-dismiss toast after 5 seconds
+                    setTimeout(() => {
+                        const toast = document.querySelector('.toast');
+                        if (toast) {
+                            toast.classList.remove('show');
+                            setTimeout(() => {
+                                if (toastContainer.parentNode) {
+                                    toastContainer.parentNode.removeChild(toastContainer);
+                                }
+                            }, 300);
+                        }
+                    }, 5000);
+                    
+                    // Add click handler to dismiss button
+                    const closeBtn = toastContainer.querySelector('.btn-close');
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', () => {
+                            const toast = document.querySelector('.toast');
+                            if (toast) {
+                                toast.classList.remove('show');
+                                setTimeout(() => {
+                                    if (toastContainer.parentNode) {
+                                        toastContainer.parentNode.removeChild(toastContainer);
+                                    }
+                                }, 300);
+                            }
+                        });
+                    }
+                }
+                
+                // Clear the URL parameter
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            
             // 頁面切換
             document.getElementById('loginBtn').addEventListener('click', function() {
                 document.getElementById('loginSection').classList.remove('d-none');

@@ -112,6 +112,13 @@
                 <i class="fas fa-truck me-2"></i>
                 Despatch Advice System
             </a>
+            <div class="ms-auto d-none" id="logoutButton">
+                <span class="text-light me-3" id="userEmail"></span>
+                <button class="btn btn-outline-light" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt me-2"></i>
+                    Logout
+                </button>
+            </div>
         </div>
     </nav>
 
@@ -135,6 +142,52 @@
     <script>
         const API_BASE_URL = 'https://7z56uquwqumjtnnfjy2k7bv4jq0yizdl.lambda-url.us-east-1.on.aws';
 
+        // 檢查用戶是否已登入
+        function checkAuthStatus() {
+            const token = localStorage.getItem('token');
+            const email = localStorage.getItem('email');
+            
+            if (token && email) {
+                // 驗證 token 格式
+                if (token.length < 10 || !token.includes('.')) {
+                    // 無效的 token 格式，清除並重定向
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('email');
+                    window.location.replace('index.html?auth=invalid');
+                    return false;
+                }
+                
+                // 更新已登入狀態的 UI
+                document.getElementById('logoutButton').classList.remove('d-none');
+                document.getElementById('userEmail').textContent = email;
+                return true;
+            } else {
+                // 未登入，重定向到登入頁面
+                window.location.replace('index.html?auth=required');
+                return false;
+            }
+        }
+
+        // 安全檢查 - 防止直接 URL 訪問
+        if (document.referrer === '' || 
+            (!document.referrer.includes('index.html') && 
+             !document.referrer.includes('create-batch.html') && 
+             !document.referrer.includes('all-batches.html') && 
+             !document.referrer.includes('update-batch.html') && 
+             !document.referrer.includes('delete-batch.html') && 
+             !document.referrer.includes('batch-details.html') &&
+             !document.referrer.includes('create-xml.html') &&
+             !document.referrer.includes('generate.html') &&
+             !document.referrer.includes('all.html') &&
+             !document.referrer.includes('delete.html') &&
+             !document.referrer.includes('info.html') &&
+             !document.referrer.includes('ids.html'))) {
+            // 如果是直接訪問而不是通過適當的導航
+            if (!localStorage.getItem('token') || !localStorage.getItem('email')) {
+                window.location.replace('index.html?auth=direct');
+            }
+        }
+
         async function getAllDespatchAdvices() {
             try {
                 const response = await fetch(`${API_BASE_URL}/api/v1/despatch-advice-all`);
@@ -149,8 +202,32 @@
             }
         }
 
-        // Auto load data on page load
-        document.addEventListener('DOMContentLoaded', getAllDespatchAdvices);
+        // 登出功能
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            const email = localStorage.getItem('email');
+            
+            fetch(`${API_BASE_URL}/api/logout`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email })
+            })
+            .then(response => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('email');
+                window.location.href = 'index.html';
+            })
+            .catch(error => {
+                alert('Logout failed: ' + error.message);
+            });
+        });
+
+        // 初始化頁面
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!checkAuthStatus()) return; // 如果認證檢查失敗則退出
+            getAllDespatchAdvices();
+        });
     </script>
 </body>
 </html> 

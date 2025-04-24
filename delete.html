@@ -67,22 +67,31 @@
             padding: 2rem;
         }
 
-        .form-label {
-            color: var(--primary-color);
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-
         .form-control {
-            border-radius: 8px;
-            padding: 0.75rem;
-            border: 1px solid #ced4da;
+            border-radius: 25px;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #e1e5eb;
+            background-color: #f9fafc;
             transition: all 0.3s ease;
         }
 
         .form-control:focus {
             border-color: var(--secondary-color);
             box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
         }
 
         .btn-danger {
@@ -96,20 +105,6 @@
 
         .btn-danger:hover {
             background-color: #c0392b;
-            transform: scale(1.05);
-        }
-
-        .btn-secondary {
-            background-color: #6c757d;
-            border: none;
-            padding: 0.5rem 1.5rem;
-            border-radius: 25px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .btn-secondary:hover {
-            background-color: #5a6268;
             transform: scale(1.05);
         }
 
@@ -129,49 +124,6 @@
             margin: 0;
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
         }
-
-        .confirmation-dialog {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: var(--card-shadow);
-            z-index: 1000;
-            width: 90%;
-            max-width: 500px;
-        }
-
-        .confirmation-dialog h5 {
-            color: var(--primary-color);
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .confirmation-dialog p {
-            color: #666;
-            margin-bottom: 1.5rem;
-        }
-
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 999;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 15px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -181,6 +133,13 @@
                 <i class="fas fa-truck me-2"></i>
                 Despatch Advice System
             </a>
+            <div class="ms-auto d-none" id="logoutButton">
+                <span class="text-light me-3" id="userEmail"></span>
+                <button class="btn btn-outline-light" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt me-2"></i>
+                    Logout
+                </button>
+            </div>
         </div>
     </nav>
 
@@ -189,89 +148,139 @@
         
         <div class="card">
             <div class="card-body">
-                <form id="deleteDespatchForm">
-                    <div class="mb-4">
-                        <label for="deleteDespatchId" class="form-label">
-                            <i class="fas fa-trash-alt me-2"></i>
-                            Enter Despatch ID to Delete
-                        </label>
-                        <input type="text" class="form-control" id="deleteDespatchId" placeholder="e.g., DA-2024-3">
-                    </div>
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash me-2"></i>
-                        Delete Despatch Advice
-                    </button>
-                </form>
+                <div class="mb-3">
+                    <label for="despatchAdviceId" class="form-label">Despatch Advice ID</label>
+                    <input type="text" class="form-control" id="despatchAdviceId" 
+                           placeholder="Enter the ID of the despatch advice to delete">
+                </div>
+                
+                <button onclick="deleteDespatchAdvice()" class="btn btn-danger">
+                    <i class="fas fa-trash me-2"></i>
+                    Delete Despatch Advice
+                </button>
+                
                 <div class="response-area mt-3">
-                    <pre id="deleteDespatchResponse">Response will appear here...</pre>
+                    <pre id="deleteDespatchAdviceResponse">Response will appear here...</pre>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Confirmation Dialog -->
-    <div class="overlay" id="overlay"></div>
-    <div class="confirmation-dialog" id="confirmationDialog">
-        <h5>Confirm Deletion</h5>
-        <p>Are you sure you want to delete this despatch advice?</p>
-        <div class="text-end">
-            <button class="btn btn-secondary me-2" onclick="cancelDelete()">
-                <i class="fas fa-times me-2"></i>
-                Cancel
-            </button>
-            <button class="btn btn-danger" onclick="confirmDelete()">
-                <i class="fas fa-trash me-2"></i>
-                Delete
-            </button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const API_BASE_URL = 'https://7z56uquwqumjtnnfjy2k7bv4jq0yizdl.lambda-url.us-east-1.on.aws';
-        let pendingDespatchId = null;
 
-        document.getElementById('deleteDespatchForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const despatchId = document.getElementById('deleteDespatchId').value;
+        // 檢查用戶是否已登入
+        function checkAuthStatus() {
+            const token = localStorage.getItem('token');
+            const email = localStorage.getItem('email');
             
-            if (!despatchId) {
-                alert('Please enter a Despatch ID');
+            if (token && email) {
+                // 驗證 token 格式
+                if (token.length < 10 || !token.includes('.')) {
+                    // 無效的 token 格式，清除並重定向
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('email');
+                    window.location.replace('index.html?auth=invalid');
+                    return false;
+                }
+                
+                // 更新已登入狀態的 UI
+                document.getElementById('logoutButton').classList.remove('d-none');
+                document.getElementById('userEmail').textContent = email;
+                return true;
+            } else {
+                // 未登入，重定向到登入頁面
+                window.location.replace('index.html?auth=required');
+                return false;
+            }
+        }
+
+        // 安全檢查 - 防止直接 URL 訪問
+        if (document.referrer === '' || 
+            (!document.referrer.includes('index.html') && 
+             !document.referrer.includes('create-batch.html') && 
+             !document.referrer.includes('all-batches.html') && 
+             !document.referrer.includes('update-batch.html') && 
+             !document.referrer.includes('delete-batch.html') && 
+             !document.referrer.includes('batch-details.html') &&
+             !document.referrer.includes('create-xml.html') &&
+             !document.referrer.includes('generate.html') &&
+             !document.referrer.includes('all.html') &&
+             !document.referrer.includes('delete.html') &&
+             !document.referrer.includes('info.html') &&
+             !document.referrer.includes('ids.html'))) {
+            // 如果是直接訪問而不是通過適當的導航
+            if (!localStorage.getItem('token') || !localStorage.getItem('email')) {
+                window.location.replace('index.html?auth=direct');
+            }
+        }
+
+        async function deleteDespatchAdvice() {
+            const id = document.getElementById('despatchAdviceId').value.trim();
+            
+            if (!id) {
+                document.getElementById('deleteDespatchAdviceResponse').textContent = 
+                    'Please enter a despatch advice ID.';
                 return;
             }
-
-            pendingDespatchId = despatchId;
-            document.getElementById('overlay').style.display = 'block';
-            document.getElementById('confirmationDialog').style.display = 'block';
-        });
-
-        function cancelDelete() {
-            pendingDespatchId = null;
-            document.getElementById('overlay').style.display = 'none';
-            document.getElementById('confirmationDialog').style.display = 'none';
-        }
-
-        async function confirmDelete() {
-            if (!pendingDespatchId) return;
-
+            
+            if (!confirm(`Are you sure you want to delete despatch advice with ID: ${id}? This action cannot be undone.`)) {
+                document.getElementById('deleteDespatchAdviceResponse').textContent = 
+                    'Delete operation cancelled.';
+                return;
+            }
+            
             try {
-                const response = await fetch(`${API_BASE_URL}/api/v1/despatch-advice-delete/${pendingDespatchId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/v2/despatch-advice/${id}`, {
                     method: 'DELETE'
                 });
-                const data = await response.json();
-                document.getElementById('deleteDespatchResponse').textContent = 
-                    `HTTP Status Code: ${response.status}\n\n` + 
-                    JSON.stringify(data, null, 2);
+                
+                let responseText;
+                try {
+                    const data = await response.json();
+                    responseText = JSON.stringify(data, null, 2);
+                } catch (e) {
+                    responseText = await response.text() || 'No response body';
+                }
+                
+                document.getElementById('deleteDespatchAdviceResponse').textContent = 
+                    `HTTP Status Code: ${response.status}\n\n` + responseText;
+                
+                if (response.ok) {
+                    document.getElementById('despatchAdviceId').value = '';
+                }
             } catch (error) {
-                document.getElementById('deleteDespatchResponse').textContent = 
-                    `Error: ${error.message}\n\n` +
-                    `HTTP Status Code: ${error.status || 'Unknown'}`;
+                document.getElementById('deleteDespatchAdviceResponse').textContent = 
+                    `Error: ${error.message}`;
             }
-
-            pendingDespatchId = null;
-            document.getElementById('overlay').style.display = 'none';
-            document.getElementById('confirmationDialog').style.display = 'none';
         }
+
+        // 登出功能
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            const email = localStorage.getItem('email');
+            
+            fetch(`${API_BASE_URL}/api/logout`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email })
+            })
+            .then(response => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('email');
+                window.location.href = 'index.html';
+            })
+            .catch(error => {
+                alert('Logout failed: ' + error.message);
+            });
+        });
+
+        // 初始化頁面
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus(); // 檢查用戶是否已登入
+        });
     </script>
 </body>
 </html> 

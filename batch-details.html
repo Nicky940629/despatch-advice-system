@@ -342,19 +342,44 @@
             const email = localStorage.getItem('email');
             
             if (token && email) {
-                // Logged in
+                // Validate token format
+                if (token.length < 10 || !token.includes('.')) {
+                    // Invalid token format, clear and redirect
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('email');
+                    window.location.replace('index.html?auth=invalid');
+                    return false;
+                }
+                
+                // Update UI for logged in state
                 document.getElementById('authButtons').classList.add('d-none');
                 document.getElementById('logoutButton').classList.remove('d-none');
                 document.getElementById('userEmail').textContent = email;
+                return true;
             } else {
                 // Not logged in, redirect to login page
-                window.location.href = 'index.html';
+                window.location.replace('index.html?auth=required');
+                return false;
+            }
+        }
+
+        // Security check - prevent direct URL access
+        if (document.referrer === '' || 
+            (!document.referrer.includes('index.html') && 
+             !document.referrer.includes('create-batch.html') && 
+             !document.referrer.includes('all-batches.html') && 
+             !document.referrer.includes('update-batch.html') && 
+             !document.referrer.includes('delete-batch.html') && 
+             !document.referrer.includes('batch-details.html'))) {
+            // Redirect if directly accessed without proper navigation
+            if (!localStorage.getItem('token') || !localStorage.getItem('email')) {
+                window.location.replace('index.html?auth=direct');
             }
         }
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
-            checkAuthStatus();
+            if (!checkAuthStatus()) return; // Exit if auth check fails
             
             const batchId = getBatchIdFromUrl();
             if (!batchId) {
